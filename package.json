@@ -1,0 +1,26 @@
+{
+  "name": "voice-ai-assistant",
+  "version": "1.0.0",
+  "description": "A voice-enabled AI assistant with secure backend proxy",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "voice",
+    "ai",
+    "assistant",
+    "speech",
+    "openrouter"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/voice-ai-assistant.git"
+  }
+}

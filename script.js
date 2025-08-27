@@ -228,26 +228,23 @@ async function sendMessage(message) {
     output.style.opacity = '1';
     
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        // Use environment variable or fallback to localhost for development
+        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8787/api/chat'
+            : '/api/chat';
+            
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer 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',
-                'HTTP-Referer': window.location.href,
-                'X-Title': 'Voice AI Assistant'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'meta-llama/llama-3.2-3b-instruct:free',
-                messages: [
-                    { role: 'system', content: 'You are a helpful assistant. Respond in the same language as the user\'s message.' },
-                    { role: 'user', content: message }
-                ],
-                max_tokens: 500
+                message: message
             })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Server error! status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -265,11 +262,11 @@ async function sendMessage(message) {
             // Speak the response
             speak(aiResponse);
         } else {
-            throw new Error('Invalid response format');
+            throw new Error('Invalid response format from server');
         }
     } catch (error) {
         console.error('Error:', error);
-        const errorMessage = `Error: ${error.message}. Please check your API key and try again.`;
+        const errorMessage = `Error: ${error.message}. Please make sure the server is running.`;
         output.textContent = errorMessage;
         addMessageToHistory(errorMessage, false);
     }

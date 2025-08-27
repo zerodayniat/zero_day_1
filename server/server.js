@@ -2,8 +2,23 @@
 
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 const PORT = process.env.PORT || 8787;
+
+// MIME types for static file serving
+const mimeTypes = {
+  '.html': 'text/html',
+  '.css': 'text/css',
+  '.js': 'application/javascript',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon'
+};
 
 function sendJson(res, status, data, headers = {}) {
   const payload = typeof data === 'string' ? data : JSON.stringify(data);
@@ -122,6 +137,42 @@ const server = http.createServer(async (req, res) => {
       }
     });
 
+    return;
+  }
+
+  // Serve static files
+  if (req.method === 'GET') {
+    let filePath = req.url === '/' ? '/index.html' : req.url;
+    filePath = path.join(__dirname, '..', filePath);
+    
+    // Security: prevent directory traversal
+    if (!filePath.startsWith(path.join(__dirname, '..'))) {
+      res.writeHead(403);
+      res.end('Forbidden');
+      return;
+    }
+
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        if (err.code === 'ENOENT') {
+          res.writeHead(404);
+          res.end('File not found');
+        } else {
+          res.writeHead(500);
+          res.end('Server error');
+        }
+        return;
+      }
+
+      const ext = path.extname(filePath);
+      const mimeType = mimeTypes[ext] || 'application/octet-stream';
+      
+      res.writeHead(200, {
+        'Content-Type': mimeType,
+        'Access-Control-Allow-Origin': '*'
+      });
+      res.end(data);
+    });
     return;
   }
 
